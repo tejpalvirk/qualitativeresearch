@@ -1,0 +1,19 @@
+{
+  "entities": [
+    {
+      "name": "TestInterview",
+      "entityType": "interview",
+      "observations": [
+        "A test interview for integration testing"
+      ]
+    },
+    {
+      "name": "TestInterview_826783",
+      "entityType": "interview",
+      "observations": [
+        "A test interview for integration testing"
+      ]
+    }
+  ],
+  "relations": []
+}
