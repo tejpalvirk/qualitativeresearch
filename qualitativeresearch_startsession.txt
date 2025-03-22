@@ -1,5 +1,3 @@
-Start Session Tool for Qualitative Research
-
 A comprehensive tool for initializing a new qualitative research session, providing structured information about ongoing research projects, participants, analytical elements, and recent research activities.
 
 When to use this tool:

@@ -1,5 +1,3 @@
-Load Context Tool for Qualitative Research
-
 A sophisticated tool for retrieving rich, contextual information about qualitative research entities, providing structured insights tailored to different research components.
 
 When to use this tool:

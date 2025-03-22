@@ -1,5 +1,3 @@
-Delete Context Tool for Qualitative Research
-
 A precise tool for removing elements from the qualitative research knowledge graph, enabling researchers to maintain data accuracy and refine their analytical framework.
 
 When to use this tool:

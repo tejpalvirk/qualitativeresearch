@@ -1,5 +1,3 @@
-Build Context Tool for Qualitative Research
-
 A versatile tool for constructing and enhancing the qualitative research knowledge graph by adding new research elements, relationships, and observations.
 
 When to use this tool:

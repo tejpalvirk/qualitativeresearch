@@ -1,5 +1,3 @@
-End Session Tool for Qualitative Research
-
 A multi-stage tool for documenting qualitative research sessions, recording analysis progress, tracking coding activities, and creating a structured record of research evolution.
 
 When to use this tool:
