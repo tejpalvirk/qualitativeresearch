@@ -1,0 +1,65 @@
+Build Context Tool for Qualitative Research
+
+A versatile tool for constructing and enhancing the qualitative research knowledge graph by adding new research elements, relationships, and observations.
+
+When to use this tool:
+- Creating new research entities (projects, participants, interviews, observations, codes, themes, memos, etc.)
+- Establishing relationships between research elements (e.g., connecting participants to projects, codes to data segments)
+- Adding observations, notes, or content to existing research entities
+- Building the research corpus incrementally as data collection and analysis progress
+- Organizing and structuring qualitative data within your research framework
+- Documenting emerging themes, codes, and analytical insights during research
+- Creating research questions and linking them to findings
+- Building code hierarchies and thematic frameworks
+
+Key features:
+- Creates three distinct types of knowledge graph elements: entities, relations, and observations
+- Supports 13 specialized qualitative research entity types (projects, participants, interviews, observations, documents, codes, code groups, memos, themes, quotes, literature, research questions, findings)
+- Validates entity and relation types against predefined standards for the qualitative research domain
+- Handles batch creation of multiple entities or relations in a single operation
+- Returns confirmation with details of created elements
+- Ensures proper data typing and structure for the qualitative research knowledge graph
+- Enables comprehensive documentation of the research process
+
+Parameters explained:
+1. type: The type of creation operation to perform
+  - Accepts: "entities", "relations", or "observations"
+  - Determines how the data parameter is interpreted
+2. data: The content to add to the knowledge graph (structure varies by type):
+  - For "entities": An array of objects, each containing:
+    * name: Unique identifier for the entity
+    * entityType: One of the valid entity types (project, participant, interview, observation, document, code, codeGroup, memo, theme, quote, literature, researchQuestion, finding)
+    * observations: Array of strings containing notes or properties about the entity
+  - For "relations": An array of objects, each containing:
+    * from: Name of the source entity
+    * to: Name of the target entity
+    * relationType: The type of relationship between entities
+  - For "observations": Either a single object or an array of objects, each containing:
+    * entityName: Name of the entity to add observations to
+    * contents: Array of strings with new observations to add
+
+Return information:
+- JSON response indicating success or failure
+- For successful operations:
+  * Success flag set to true
+  * Details of created elements in the "created" field (for entities/relations) or "added" field (for observations)
+- For failed operations:
+  * Success flag set to false
+  * Error message describing the issue
+
+Error handling:
+- Validates entity types against the predefined list for qualitative research
+- Validates relation types against acceptable standards
+- Returns descriptive error messages for invalid inputs
+- Gracefully handles type mismatches and formatting errors
+
+You should:
+- Use consistent naming conventions for entities to facilitate relationships and retrieval
+- Begin by creating projects and participants before more specific research elements
+- Add detailed observations to entities to enhance context and retrievability
+- Create relationships to build a comprehensive network of interconnected research data
+- Use observations to document the evolution of codes, themes, and analytical thinking
+- Regularly update entity observations as your understanding evolves
+- Build hierarchical structures using relations (e.g., codes within code groups, themes connecting multiple codes)
+- Document the full research journey by adding memos tied to specific analytical moments
+- Link quotes to codes, themes, and findings to maintain evidential chains 

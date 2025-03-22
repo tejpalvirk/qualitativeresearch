@@ -1,0 +1,67 @@
+Load Context Tool for Qualitative Research
+
+A sophisticated tool for retrieving rich, contextual information about qualitative research entities, providing structured insights tailored to different research components.
+
+When to use this tool:
+- Retrieving detailed information about research projects, participants, interviews, and analytical elements
+- Exploring thematic analyses and research findings
+- Reviewing participant profiles and interview transcripts
+- Examining code definitions and their connections to data
+- Analyzing emerging themes and their supporting evidence
+- Investigating research questions and related findings
+- Reviewing analytical memos and their connections to data
+- Preparing for coding sessions by establishing contextual understanding
+- Exploring relationships between codes, themes, and concepts
+- Getting a comprehensive overview of project progress and insights
+
+Key features:
+- Provides richly formatted, context-aware information about research entities
+- Adapts output format based on entity type (project, participant, interview, code, theme, memo, researchQuestion)
+- Presents both direct entity information and related research elements
+- Shows research design, methodology, and analysis progression
+- Tracks entity views within the current research session
+- Formats information in a structured, readable markdown format
+- Highlights relationships between research elements
+- Presents supporting quotes and evidence for themes and codes
+- Shows co-occurrence patterns between codes where available
+
+Parameters explained:
+1. entityName: Required - The name of the entity to retrieve context for
+  - Example: "Health Behavior Study", "Participant_P001", "Interview_20230315"
+2. entityType: Optional - The type of entity being retrieved
+  - Default: "project"
+  - Helps the system format the output appropriately
+  - Common types include: "project", "participant", "interview", "code", "theme", "memo", "researchQuestion"
+3. sessionId: Optional - The current session identifier
+  - Typically provided by startsession
+  - Used for tracking entity views within the session
+
+Each entity type returns specialized context information:
+- Project: Shows project status, description, research design, research questions, data collection stats, recent interviews, analysis progress (themes), and findings
+- Participant: Displays demographic information, interview history, observation records, notable quotes, and research memos
+- Interview: Shows project affiliation, participant, date, transcript content, applied codes, and notable quotes
+- Code: Displays definition, status, creation date, code group affiliations, supporting quotes, sources, associated themes, and code co-occurrence data
+- Theme: Shows description, status, creation date, project affiliation, supporting codes, example quotes, and analytical memos
+- Memo: Displays topic, date, project affiliation, content, and related entities
+- Research Question: Shows the question text, project affiliation, related findings, themes, and supporting quotes
+- Other Entity Types: Shows observations and relationship information for other entity types
+
+Return information:
+- Formatted markdown text with hierarchical structure
+- Sections adapted to the specific entity type
+- Related entities shown with their descriptions and connections
+- Error messages if the entity doesn't exist or can't be retrieved
+
+You should:
+- Specify the exact entity name for accurate retrieval
+- Provide the entity type when possible for optimally formatted results
+- Start with project entities to get a high-level overview of research
+- Use participant context to understand individual perspectives
+- Examine interview context to see coding applied to raw data
+- Review code context to understand analytical categories
+- Explore theme context to see patterns and theoretical constructs
+- Use research question context to track progress toward answering key inquiries
+- Examine memo context to review analytical insights
+- After retrieving context, follow up on specific entities of interest
+- Use in conjunction with startsession to maintain session tracking
+- Remember that this tool only retrieves existing information; use buildcontext to add new entities 

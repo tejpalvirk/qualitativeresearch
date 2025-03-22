@@ -1,0 +1,100 @@
+End Session Tool for Qualitative Research
+
+A multi-stage tool for documenting qualitative research sessions, recording analysis progress, tracking coding activities, and creating a structured record of research evolution.
+
+When to use this tool:
+- Concluding a qualitative research analysis session
+- Documenting interview data collection activities
+- Recording newly created analytical memos
+- Tracking coding activities and code applications
+- Documenting emerging themes and theoretical constructs
+- Updating overall project status and progress
+- Creating a structured record of research activities
+- Establishing a formal conclusion to a focused research period
+- Building a historical record of project development
+- Documenting observations and insights from a research session
+
+Key features:
+- Provides a structured, multi-stage workflow for research session documentation
+- Records interview data collection in the knowledge graph
+- Captures newly created analytical memos
+- Tracks coding activities across data sources
+- Documents emerging themes and their connections to codes
+- Updates project status information
+- Maintains session continuity with unique session IDs
+- Supports revision of previous stages when needed
+- Offers a comprehensive assembly stage that consolidates all session information
+- Organizes qualitative research activity into a coherent narrative
+
+The endsession tool uses a sequential, multi-stage approach with 7 typical stages:
+1. Summary Stage: Records basic session information
+2. Interview Data Stage: Documents new interviews conducted
+3. Memos Stage: Records new analytical memos created
+4. Coding Activity Stage: Documents code applications and coding work
+5. Themes Stage: Records emerging themes and theoretical insights
+6. Project Status Stage: Updates the overall project status
+7. Assembly Stage: Consolidates all information and finalizes the session record
+
+Parameters explained:
+1. sessionId: Required - Unique identifier for the research session
+  - Obtained from the startsession tool
+  - Example: "qual_1234567890_abc123"
+2. stage: Required - Current stage of the endsession workflow
+  - Accepts: "summary", "interviewData", "memos", "codingActivity", "themes", "projectStatus", or "assembly"
+  - Each stage has specific data requirements and processing logic
+3. stageNumber: Required - The sequence number of the current stage
+  - Starts at 1 and typically progresses through the stages
+  - Used to track progress through the session documentation workflow
+4. totalStages: Required - Total number of stages planned for this workflow
+  - Typically 7 for the complete workflow
+  - Provides context for the progress within the overall process
+5. analysis: Optional - Text analysis or observations for the current stage
+  - Descriptive text explaining the work done in this stage
+  - Example: "Analyzed interview transcripts and identified recurring patterns"
+6. stageData: Optional - Stage-specific structured data
+  - Structure varies by stage type:
+    * summary: { summary: "Session summary text", duration: "3 hours", project: "ProjectName" }
+    * interviewData: { interviews: [{ participant: "P001", notes: "Interview notes", date: "2023-04-15" }] }
+    * memos: { memos: [{ topic: "Emerging patterns", content: "Detailed memo text" }] }
+    * codingActivity: { codes: [{ code: "coping_strategy", dataItem: "Interview_P001", note: "Applied to discussion of stress management" }] }
+    * themes: { themes: [{ name: "Social Support", codes: ["family_support", "peer_networks"], description: "The role of social connections in coping" }] }
+    * projectStatus: { projectStatus: "data_analysis", projectObservation: "Making good progress on initial coding" }
+    * assembly: No stageData needed - automatically assembled from previous stages
+7. nextStageNeeded: Required - Whether additional stages are needed after this one
+  - Boolean value (true/false)
+  - Set to false on the final stage to complete the session
+8. isRevision: Optional - Whether this is revising a previous stage
+  - Boolean value (true/false)
+  - Default: false
+9. revisesStage: Optional - If revising, which stage number is being revised
+  - Required when isRevision is true
+  - Indicates which previous stage is being updated
+
+When the endsession workflow completes (assembly stage with nextStageNeeded: false), the tool:
+1. Records the session completion in persistent storage
+2. Creates a formatted summary of all session information
+3. Preserves the record of research activities for future reference
+
+Return information:
+- JSON response with the following structure:
+  * success: Boolean indicating whether the operation succeeded
+  * stageCompleted: The stage that was just completed
+  * nextStageNeeded: Whether more stages are required
+  * stageResult: The processed result of the current stage
+  * endSessionArgs: (Only in assembly stage) Consolidated arguments for the session
+  * sessionRecorded: (Final stage only) Whether the session was recorded
+  * summaryMessage: (Final stage only) Formatted summary of all recorded information
+  * error: (Only on failure) Error message describing the issue
+
+You should:
+- Complete all stages in order for comprehensive session documentation
+- Provide specific details in each stage for accurate research documentation
+- Document interview data with participant identifiers and key notes
+- Create descriptive titles for analytical memos
+- Be specific about which codes were applied to which data items
+- Connect emerging themes to their supporting codes
+- Include relevant observations for project status updates
+- If making a revision, specify which stage is being revised
+- Only mark nextStageNeeded as false on the final assembly stage
+- Review the final summary message to confirm all session details were recorded properly
+- Use the unique session ID consistently across all stages 

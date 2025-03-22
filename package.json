@@ -1,0 +1,53 @@
+{
+  "name": "contextmanager-qualitativeresearch",
+  "version": "1.0.0",
+  "description": "MCP Server implementations for managing context of qualitative research projects",
+  "type": "module",
+  "main": "./index.js",
+  "bin": {
+    "contextmanager-qualitativeresearch": "./index.js"
+  },
+  "files": [
+    "index.js",
+    "README.md",
+    "*.txt"
+  ],
+  "scripts": {
+    "build": "tsc && shx chmod +x index.js",
+    "prepare": "npm run build",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tejpalvirk/contextmanager.git"
+  },
+  "keywords": [
+    "mcp",
+    "claude",
+    "context"
+  ],
+  "author": "Tejpal Virk",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tejpalvirk/contextmanager/issues"
+  },
+  "homepage": "https://github.com/tejpalvirk/contextmanager#readme",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.7.0",
+    "zod": "^3.22.4",
+    "yargs": "^17.7.2",
+    "chalk": "^5.3.0"
+  },
+  "bundledDependencies": [
+    "@modelcontextprotocol/sdk",
+    "zod",
+    "yargs",
+    "chalk"
+  ],
+  "devDependencies": {
+    "@types/node": "^18.15.3",
+    "@types/yargs": "^17.0.33",
+    "shx": "^0.3.4",
+    "typescript": "^5.0.2"
+  }
+}

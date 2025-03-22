@@ -1,0 +1,58 @@
+## Usage examples
+
+### Stage 1: Summary Stage
+```json
+{
+  "sessionId": "qual_1234567890_abc123",
+  "stage": "summary",
+  "stageNumber": 1,
+  "totalStages": 7,
+  "analysis": "Analyzed progress on the interview data coding",
+  "stageData": {
+    "summary": "Completed initial coding of participant interviews",
+    "duration": "3 hours",
+    "project": "Health Behavior Study"
+  },
+  "nextStageNeeded": true,
+  "isRevision": false
+}
+```
+
+### Stage 5: Themes Stage
+```json
+{
+  "sessionId": "qual_1234567890_abc123",
+  "stage": "themes",
+  "stageNumber": 5,
+  "totalStages": 7,
+  "analysis": "Identified emerging themes",
+  "stageData": {
+    "themes": [
+      { 
+        "name": "Perceived Barriers", 
+        "codes": ["time_constraints", "financial_concerns"], 
+        "description": "Factors preventing healthy behaviors" 
+      },
+      { 
+        "name": "Social Support", 
+        "codes": ["family_influence", "peer_encouragement"], 
+        "description": "External motivation from relationships" 
+      }
+    ]
+  },
+  "nextStageNeeded": true,
+  "isRevision": false
+}
+```
+
+### Final Stage: Assembly
+```json
+{
+  "sessionId": "qual_1234567890_abc123",
+  "stage": "assembly",
+  "stageNumber": 7,
+  "totalStages": 7,
+  "nextStageNeeded": false,
+  "isRevision": false
+}
+```

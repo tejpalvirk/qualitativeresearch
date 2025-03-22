@@ -1,0 +1,73 @@
+Start Session Tool for Qualitative Research
+
+A comprehensive tool for initializing a new qualitative research session, providing structured information about ongoing research projects, participants, analytical elements, and recent research activities.
+
+When to use this tool:
+- Beginning a new research analysis session
+- Getting oriented to your current research state across multiple projects
+- Planning which research elements to focus on in the current session
+- Reviewing recent research activities and progress
+- Identifying active research projects and their status
+- Exploring available participants for analysis
+- Reviewing your most frequently used codes
+- Accessing recent analytical memos
+- Establishing research context before diving into specific analysis tasks
+- Re-engaging with your research after time away
+
+Key features:
+- Generates a unique session identifier for tracking research activities
+- Retrieves and displays recent research sessions with summaries
+- Lists active research projects with status and phase information
+- Provides a sample of research participants with demographic information
+- Presents your most frequently used codes with reference counts
+- Highlights recent analytical memos with type and summary information
+- Formats information in an easily scannable format for quick orientation
+- Integrates with the loadcontext tool for deeper exploration
+- Maintains continuity between research sessions
+- Tracks research session history for progress review
+
+Parameters explained:
+No parameters required - the tool automatically retrieves all relevant context.
+
+Return information:
+- A unique session identifier
+- Recent research sessions (up to 3) with:
+  * Date
+  * Project name
+  * Brief summary
+- Active research projects with:
+  * Project name
+  * Current status
+  * Research phase
+- Sample participants (up to 5) with:
+  * Participant name
+  * Demographic information
+  * Participation status
+- Top codes (up to 10) with:
+  * Code name
+  * Reference count
+  * Code group
+- Recent memos (up to 3) with:
+  * Memo name
+  * Creation date
+  * Memo type
+  * Brief summary
+
+Session Workflow:
+1. Start a research session with startsession
+2. Review the provided context to decide what to focus on
+3. Use loadcontext to retrieve detailed information about specific research elements
+4. Conduct your analysis, adding new elements with buildcontext as needed
+5. End the session with endsession to record your research progress
+
+You should:
+- Begin each focused research period with startsession to establish context
+- Review recent sessions to maintain continuity in your research
+- Identify active projects that require attention
+- Note available participants for interview analysis
+- Consider frequently used codes that may indicate important patterns
+- Review recent memos to reconnect with your analytical thinking
+- Use the session ID when using other tools to maintain session tracking
+- After completing a session, record your progress using endsession
+- Establish a regular cadence of research sessions to maintain momentum
+- Use the structured overview to make deliberate choices about where to focus your analytical effort 
