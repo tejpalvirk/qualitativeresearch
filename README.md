@@ -202,7 +202,7 @@ Then configure Claude Desktop:
         "run",
         "--rm",
         "-i",
-        "mcp/researcher-qualitative"
+        "mcp/qualitativeresearch"
       ]
     }
   }
@@ -232,7 +232,7 @@ node qualitativeresearch_index.js
 ### Docker:
 
 ```bash
-docker build -t mcp/researcher-qualitative -f qualitativeresearch/Dockerfile .
+docker build -t mcp/qualitativeresearch -f qualitativeresearch/Dockerfile .
 ```
 
 ## License
