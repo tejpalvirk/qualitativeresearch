@@ -11,6 +11,9 @@ When to use this tool:
 - Accessing recent analytical memos
 - Establishing research context before diving into specific analysis tasks
 - Re-engaging with your research after time away
+- Prioritizing high-priority research tasks
+- Tracking the status of various research activities
+- Understanding sequential research processes
 
 Key features:
 - Generates a unique session identifier for tracking research activities
@@ -23,6 +26,9 @@ Key features:
 - Integrates with the loadcontext tool for deeper exploration
 - Maintains continuity between research sessions
 - Tracks research session history for progress review
+- Displays high-priority research tasks needing attention
+- Shows status information for key research activities
+- Presents sequential relationships between research processes
 
 Parameters explained:
 No parameters required - the tool automatically retrieves all relevant context.
@@ -50,6 +56,27 @@ Return information:
   * Creation date
   * Memo type
   * Brief summary
+- High-priority research tasks (up to 5) with:
+  * Task name
+  * Current status
+  * Associated project
+- Upcoming research activities (up to 3) with:
+  * Activity name
+  * Scheduled date
+  * Prerequisite activities
+  * Current status
+
+Status and Priority Information:
+- Research activities are displayed with their current status values
+- High-priority tasks are prominently highlighted for attention
+- Valid status values include: planning, data_collection, analysis, writing, complete, scheduled, conducted, transcribed, coded, analyzed, emerging, developing, established, preliminary, draft, final, active, in_progress
+- Priority values (high, low) help indicate which tasks need immediate attention
+
+Sequential Process Information:
+- Upcoming activities show prerequisite tasks that must be completed first
+- Research phases are presented in their logical sequence
+- The precedes relation is used to determine activity ordering
+- Sequential relationships help visualize the research workflow
 
 Session Workflow:
 1. Start a research session with startsession
@@ -65,6 +92,9 @@ You should:
 - Note available participants for interview analysis
 - Consider frequently used codes that may indicate important patterns
 - Review recent memos to reconnect with your analytical thinking
+- Prioritize high-priority tasks for immediate attention
+- Check the status of research activities to maintain progress awareness
+- Consider sequential relationships when planning your research activities
 - Use the session ID when using other tools to maintain session tracking
 - After completing a session, record your progress using endsession
 - Establish a regular cadence of research sessions to maintain momentum

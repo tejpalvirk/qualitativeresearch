@@ -11,6 +11,9 @@ When to use this tool:
 - Preparing for coding sessions by establishing contextual understanding
 - Exploring relationships between codes, themes, and concepts
 - Getting a comprehensive overview of project progress and insights
+- Tracking research activities by their current status
+- Managing tasks based on their assigned priorities
+- Understanding sequential relationships between research processes
 
 Key features:
 - Provides richly formatted, context-aware information about research entities
@@ -22,6 +25,9 @@ Key features:
 - Highlights relationships between research elements
 - Presents supporting quotes and evidence for themes and codes
 - Shows co-occurrence patterns between codes where available
+- Includes status information for tracking research progress
+- Displays priority assignments for critical research elements
+- Visualizes sequential relationships between research processes
 
 Parameters explained:
 1. entityName: Required - The name of the entity to retrieve context for
@@ -29,7 +35,7 @@ Parameters explained:
 2. entityType: Optional - The type of entity being retrieved
   - Default: "project"
   - Helps the system format the output appropriately
-  - Common types include: "project", "participant", "interview", "code", "theme", "memo", "researchQuestion"
+  - Common types include: "project", "participant", "interview", "code", "theme", "memo", "researchQuestion", "status", "priority"
 3. sessionId: Optional - The current session identifier
   - Typically provided by startsession
   - Used for tracking entity views within the session
@@ -42,12 +48,27 @@ Each entity type returns specialized context information:
 - Theme: Shows description, status, creation date, project affiliation, supporting codes, example quotes, and analytical memos
 - Memo: Displays topic, date, project affiliation, content, and related entities
 - Research Question: Shows the question text, project affiliation, related findings, themes, and supporting quotes
+- Status: Shows all entities assigned this status value, organized by entity type
+- Priority: Shows all entities assigned this priority value, organized by entity type
 - Other Entity Types: Shows observations and relationship information for other entity types
+
+Status and Priority Information:
+- All entity displays include status information when available via has_status relations
+- Priority assignments are shown for tasks and other prioritized elements
+- Valid status values include: planning, data_collection, analysis, writing, complete, scheduled, conducted, transcribed, coded, analyzed, emerging, developing, established, preliminary, draft, final, active, in_progress
+- Valid priority values include: high, low
+
+Sequential Process Relationships:
+- Entity displays show preceding and following entities through precedes relations
+- Process sequences are visualized to show workflow between research activities
+- Research phases and activities display their position in the overall research process
 
 Return information:
 - Formatted markdown text with hierarchical structure
 - Sections adapted to the specific entity type
 - Related entities shown with their descriptions and connections
+- Status and priority information prominently displayed
+- Sequential relationships clearly indicated
 - Error messages if the entity doesn't exist or can't be retrieved
 
 You should:
@@ -60,6 +81,9 @@ You should:
 - Explore theme context to see patterns and theoretical constructs
 - Use research question context to track progress toward answering key inquiries
 - Examine memo context to review analytical insights
+- Check status entities to see all research elements at the same stage
+- Review priority entities to identify critical research tasks
+- Explore sequential relationships to understand research process flow
 - After retrieving context, follow up on specific entities of interest
 - Use in conjunction with startsession to maintain session tracking
 - Remember that this tool only retrieves existing information; use buildcontext to add new entities 

@@ -16,6 +16,11 @@ interface KnowledgeGraph {
 declare class KnowledgeGraphManager {
     private loadGraph;
     private saveGraph;
+    initializeStatusAndPriority(): Promise<void>;
+    getEntityStatus(entityName: string): Promise<string | null>;
+    getEntityPriority(entityName: string): Promise<string | null>;
+    setEntityStatus(entityName: string, statusValue: string): Promise<void>;
+    setEntityPriority(entityName: string, priorityValue: string): Promise<void>;
     createEntities(entities: Entity[]): Promise<Entity[]>;
     createRelations(relations: Relation[]): Promise<Relation[]>;
     addObservations(observations: {

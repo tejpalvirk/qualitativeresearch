@@ -10,6 +10,9 @@ When to use this tool:
 - Eliminating deprecated codes, themes, or concepts that no longer fit your analytical framework
 - Removing sensitive information that should not be retained
 - Reorganizing your analytical structure by removing and recreating elements
+- Updating status assignments when research activities change state
+- Modifying priority assignments as research focus shifts
+- Restructuring sequential relationships between research processes
 
 Key features:
 - Provides targeted deletion capabilities for three distinct types of knowledge graph elements: entities, relations, and observations
@@ -18,6 +21,8 @@ Key features:
 - Returns clear confirmation of deletion results
 - Preserves the overall structure of the research knowledge graph while removing specific elements
 - Performs validation to ensure deletion requests are properly formatted
+- Handles status and priority relation management
+- Supports modification of sequential process relationships
 
 Parameters explained:
 1. type: The type of deletion operation to perform
@@ -25,11 +30,11 @@ Parameters explained:
   - Determines how the data parameter is interpreted 
 2. data: The elements to remove from the knowledge graph (structure varies by type):
   - For "entities": Array of entity names to delete
-    * Example: ["Participant_A", "Interview_3", "Code_Anxiety"]
+    * Example: ["Participant_A", "Interview_3"]
   - For "relations": Array of relation objects, each containing:
     * from: Name of the source entity
     * to: Name of the target entity
-    * relationType: Type of relationship to remove
+    * relationType: Type of relationship to remove (e.g., "participated_in", "codes", "has_status", "has_priority", "precedes")
   - For "observations": Array of objects, each containing:
     * entityName: Name of the entity to remove observations from
     * indices: Array of numeric indices identifying which observations to remove
@@ -39,11 +44,24 @@ Deletion behavior by type:
 - Relations: Removes only the specified relationships, leaving the connected entities intact
 - Observations: Removes specific observations from entities while preserving the entities themselves
 
+Status and Priority Management:
+- When deleting status or priority entities, be aware of the impact on entities that reference them
+- For changing an entity's status or priority, first delete the existing has_status or has_priority relation, then create a new one
+- Consider the research workflow implications when removing status entities or relations
+- Deletion of a status entity will remove all has_status relations pointing to it
+
+Sequential Process Management:
+- Removing precedes relations affects the logical flow of research processes
+- Consider restructuring sequential relationships after deletion to maintain process continuity
+- When reorganizing research phases, update all affected precedes relations
+
 Safety considerations:
 - Entity deletion is permanent and will also remove all relationships involving those entities
 - Consider exporting or backing up your research knowledge graph before performing large-scale deletions
 - For sensitive operations, consider removing specific observations rather than entire entities
 - When removing codes or themes, consider the impact on your analytical framework
+- Status changes should be carefully managed to maintain accurate research progress tracking
+- Changes to sequential relationships may affect dependent research activities
 
 Return information:
 - JSON response indicating success or failure
@@ -62,4 +80,6 @@ You should:
 - Use deletecontext in conjunction with buildcontext to refine and evolve your research framework
 - Regularly review your knowledge graph for elements that may need to be removed or updated
 - Consider the cascading effects of entity deletion on your overall research structure
-- Use observation deletion for minor corrections rather than removing entire entities 
+- Use observation deletion for minor corrections rather than removing entire entities
+- When updating entity status, delete the old has_status relation before creating a new one
+- Maintain logical consistency when modifying sequential process relationships 

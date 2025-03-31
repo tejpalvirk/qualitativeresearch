@@ -36,7 +36,9 @@ const VALID_ENTITY_TYPES = [
     'quote', // Notable excerpts from data sources
     'literature', // Academic sources
     'researchQuestion', // Formal questions guiding the study
-    'finding' // Results or conclusions
+    'finding', // Results or conclusions
+    'status', // Status entity type
+    'priority' // Priority entity type
 ];
 // Qualitative Research specific relation types
 const VALID_RELATION_TYPES = [
@@ -57,7 +59,10 @@ const VALID_RELATION_TYPES = [
     'derived_from', // Entity is derived from another entity
     'collected_on', // Data collection date
     'analyzes', // Analysis relationship
-    'triangulates_with' // Triangulation between data sources
+    'triangulates_with', // Triangulation between data sources
+    'has_status', // Entity has a specific status
+    'has_priority', // Entity has a specific priority
+    'precedes' // Entity comes before another entity in sequence
 ];
 // Status values for different entity types in qualitative research
 const STATUS_VALUES = {
@@ -68,6 +73,20 @@ const STATUS_VALUES = {
     theme: ['emerging', 'developing', 'established'],
     finding: ['preliminary', 'draft', 'final']
 };
+// Define valid status values for all entity types
+const VALID_STATUS_VALUES = [
+    'planning', 'data_collection', 'analysis', 'writing', 'complete',
+    'scheduled', 'conducted', 'transcribed', 'coded', 'analyzed',
+    'planned', 'documented',
+    'initial', 'revised', 'final',
+    'emerging', 'developing', 'established',
+    'preliminary', 'draft',
+    'active', 'in_progress', 'not_started'
+];
+// Define valid priority values
+const VALID_PRIORITY_VALUES = [
+    'high', 'low'
+];
 // Basic validation functions
 function validateEntityType(entityType) {
     return VALID_ENTITY_TYPES.includes(entityType);
@@ -140,6 +159,89 @@ class KnowledgeGraphManager {
     }
     async saveGraph(graph) {
         await fs.writeFile(MEMORY_FILE_PATH, JSON.stringify(graph, null, 2), 'utf-8');
+    }
+    // Initialize status and priority entities
+    async initializeStatusAndPriority() {
+        const graph = await this.loadGraph();
+        // Create status entities if they don't exist
+        for (const statusValue of VALID_STATUS_VALUES) {
+            const statusName = `status:${statusValue}`;
+            if (!graph.entities.some(e => e.name === statusName && e.entityType === 'status')) {
+                graph.entities.push({
+                    name: statusName,
+                    entityType: 'status',
+                    observations: [`A ${statusValue} status value`]
+                });
+            }
+        }
+        // Create priority entities if they don't exist
+        for (const priorityValue of VALID_PRIORITY_VALUES) {
+            const priorityName = `priority:${priorityValue}`;
+            if (!graph.entities.some(e => e.name === priorityName && e.entityType === 'priority')) {
+                graph.entities.push({
+                    name: priorityName,
+                    entityType: 'priority',
+                    observations: [`A ${priorityValue} priority value`]
+                });
+            }
+        }
+        await this.saveGraph(graph);
+    }
+    // Helper method to get status of an entity
+    async getEntityStatus(entityName) {
+        const graph = await this.loadGraph();
+        // Find status relation for this entity
+        const statusRelation = graph.relations.find(r => r.from === entityName &&
+            r.relationType === 'has_status');
+        if (statusRelation) {
+            // Extract status value from the status entity name (status:value)
+            return statusRelation.to.split(':')[1];
+        }
+        return null;
+    }
+    // Helper method to get priority of an entity
+    async getEntityPriority(entityName) {
+        const graph = await this.loadGraph();
+        // Find priority relation for this entity
+        const priorityRelation = graph.relations.find(r => r.from === entityName &&
+            r.relationType === 'has_priority');
+        if (priorityRelation) {
+            // Extract priority value from the priority entity name (priority:value)
+            return priorityRelation.to.split(':')[1];
+        }
+        return null;
+    }
+    // Helper method to set status of an entity
+    async setEntityStatus(entityName, statusValue) {
+        if (!VALID_STATUS_VALUES.includes(statusValue)) {
+            throw new Error(`Invalid status value: ${statusValue}. Valid values are: ${VALID_STATUS_VALUES.join(', ')}`);
+        }
+        const graph = await this.loadGraph();
+        // Remove any existing status relations for this entity
+        graph.relations = graph.relations.filter(r => !(r.from === entityName && r.relationType === 'has_status'));
+        // Add new status relation
+        graph.relations.push({
+            from: entityName,
+            to: `status:${statusValue}`,
+            relationType: 'has_status'
+        });
+        await this.saveGraph(graph);
+    }
+    // Helper method to set priority of an entity
+    async setEntityPriority(entityName, priorityValue) {
+        if (!VALID_PRIORITY_VALUES.includes(priorityValue)) {
+            throw new Error(`Invalid priority value: ${priorityValue}. Valid values are: ${VALID_PRIORITY_VALUES.join(', ')}`);
+        }
+        const graph = await this.loadGraph();
+        // Remove any existing priority relations for this entity
+        graph.relations = graph.relations.filter(r => !(r.from === entityName && r.relationType === 'has_priority'));
+        // Add new priority relation
+        graph.relations.push({
+            from: entityName,
+            to: `priority:${priorityValue}`,
+            relationType: 'has_priority'
+        });
+        await this.saveGraph(graph);
     }
     async createEntities(entities) {
         const graph = await this.loadGraph();
@@ -930,6 +1032,8 @@ class KnowledgeGraphManager {
 async function main() {
     try {
         const knowledgeGraphManager = new KnowledgeGraphManager();
+        // Initialize status and priority entities
+        await knowledgeGraphManager.initializeStatusAndPriority();
         // Create the MCP server with a name and version
         const server = new McpServer({
             name: "Context Manager",
@@ -1013,10 +1117,14 @@ async function main() {
                     catch (error) {
                         methodology = { methodology: [] };
                     }
-                    // Format project context message
-                    const status = entity.observations.find(o => o.startsWith("status:"))?.substring(7) || "Unknown";
-                    const updated = entity.observations.find(o => o.startsWith("updated:"))?.substring(8) || "Unknown";
-                    const description = entity.observations.find(o => !o.startsWith("status:") && !o.startsWith("updated:"));
+                    // Get status and priority using the relation-based approach
+                    const status = await knowledgeGraphManager.getEntityStatus(entityName) || "Unknown";
+                    const priority = await knowledgeGraphManager.getEntityPriority(entityName);
+                    const priorityText = priority ? `- **Priority**: ${priority}` : "";
+                    // Format observations
+                    const observationsList = entity.observations.length > 0
+                        ? entity.observations.map(obs => `- ${obs}`).join("\n")
+                        : "No observations";
                     // Extract methodology information
                     const methodologyText = methodology.methodology?.map((m) => `- ${m}`).join("\n") || "No methodology details available";
                     // Extract research questions
@@ -1030,22 +1138,40 @@ async function main() {
                     const observationCount = projectOverview.dataCollection?.observations || 0;
                     const documentCount = projectOverview.dataCollection?.documents || 0;
                     // Format theme analysis
-                    const themesText = thematicAnalysis.themes?.map((t) => {
+                    const themesText = thematicAnalysis.themes?.map(async (t) => {
                         const codeCount = t.supportingData?.length || 0;
-                        return `- **${t.theme.name}** (Status: ${t.status || "unknown"}): ${codeCount} codes`;
-                    }).join("\n") || "No themes identified yet";
-                    // Get recent data collection 
-                    const recentInterviews = projectOverview.dataCollection?.interviewsList?.slice(0, 5).map((i) => {
+                        const themeStatus = await knowledgeGraphManager.getEntityStatus(t.theme.name) || "unknown";
+                        return `- **${t.theme.name}** (Status: ${themeStatus}): ${codeCount} codes`;
+                    });
+                    const resolvedThemesText = themesText ?
+                        await Promise.all(themesText).then(texts => texts.join("\n")) :
+                        "No themes identified yet";
+                    // Get recent data collection - without date references
+                    const recentInterviews = projectOverview.dataCollection?.interviewsList?.slice(0, 5).map(async (i) => {
                         const participant = i.observations.find(o => o.startsWith("participant:"))?.substring(12) || "Unknown";
-                        const date = i.observations.find(o => o.startsWith("date:"))?.substring(5) || "Unknown date";
-                        return `- **${i.name}** with ${participant} (${date})`;
-                    }).join("\n") || "No recent interviews";
+                        const interviewStatus = await knowledgeGraphManager.getEntityStatus(i.name) || "unknown";
+                        return `- **${i.name}** with ${participant} (Status: ${interviewStatus})`;
+                    });
+                    const resolvedInterviewsText = recentInterviews ?
+                        await Promise.all(recentInterviews).then(texts => texts.join("\n")) :
+                        "No recent interviews";
+                    // Get findings with status from relations
+                    const findingsText = projectOverview.findings?.map(async (f) => {
+                        const findingStatus = await knowledgeGraphManager.getEntityStatus(f.name) || "preliminary";
+                        const findingObs = f.observations.length > 0 ? f.observations[0] : "No description";
+                        return `- **${f.name}** (Status: ${findingStatus}): ${findingObs}`;
+                    });
+                    const resolvedFindingsText = findingsText ?
+                        await Promise.all(findingsText).then(texts => texts.join("\n")) :
+                        "No findings recorded yet";
                     contextMessage = `# Qualitative Research Project Context: ${entityName}
 
 ## Project Details
 - **Status**: ${status}
-- **Last Updated**: ${updated}
-- **Description**: ${description || "No description available"}
+${priorityText}
+
+## Observations
+${observationsList}
 
 ## Research Design
 ${methodologyText}
@@ -1060,62 +1186,83 @@ ${questionsText}
 - **Documents**: ${documentCount}
 
 ## Recent Interviews
-${recentInterviews}
+${resolvedInterviewsText}
 
 ## Analysis Progress
 ### Themes
-${themesText}
+${resolvedThemesText}
 
 ## Findings
-${projectOverview.findings?.map((f) => {
-                        const status = f.observations.find(o => o.startsWith("status:"))?.substring(7) || "preliminary";
-                        const description = f.observations.find(o => !o.startsWith("status:") && !o.startsWith("created:"));
-                        return `- **${f.name}** (${status}): ${description || "No description"}`;
-                    }).join("\n") || "No findings recorded yet"}`;
+${resolvedFindingsText}`;
                 }
                 else if (entityType === "participant") {
                     // Get participant profile
                     const participantProfile = await knowledgeGraphManager.getParticipantProfile(entityName);
-                    // Format participant context
-                    const demographics = participantProfile.demographics?.map((d) => `- ${d}`).join("\n") || "No demographic information available";
-                    // Format interviews
-                    const interviewsText = participantProfile.interviews?.map((i) => {
-                        const date = i.observations.find(o => o.startsWith("date:"))?.substring(5) || "Unknown date";
-                        return `- **${i.name}** (${date})`;
-                    }).join("\n") || "No interviews recorded";
+                    // Get status and priority using the relation-based approach
+                    const status = await knowledgeGraphManager.getEntityStatus(entityName) || "Unknown";
+                    const priority = await knowledgeGraphManager.getEntityPriority(entityName);
+                    const priorityText = priority ? `- **Priority**: ${priority}` : "";
                     // Format observations
-                    const observationsText = participantProfile.observations?.map((o) => {
-                        const date = o.observations.find(d => d.startsWith("date:"))?.substring(5) || "Unknown date";
-                        return `- **${o.name}** (${date})`;
-                    }).join("\n") || "No observations recorded";
+                    const observationsList = entity.observations.length > 0
+                        ? entity.observations.map(obs => `- ${obs}`).join("\n")
+                        : "No observations";
+                    // Format demographics without relying on patterns
+                    const demographics = participantProfile.demographics?.map((d) => `- ${d}`).join("\n") || "No demographic information available";
+                    // Format interviews with status from relations
+                    const interviewsText = participantProfile.interviews?.map(async (i) => {
+                        const interviewStatus = await knowledgeGraphManager.getEntityStatus(i.name) || "unknown";
+                        return `- **${i.name}** (Status: ${interviewStatus})`;
+                    });
+                    const resolvedInterviewsText = interviewsText ?
+                        await Promise.all(interviewsText).then(texts => texts.join("\n")) :
+                        "No interviews recorded";
+                    // Format observations with status from relations
+                    const observationsText = participantProfile.observations?.map(async (o) => {
+                        const observationStatus = await knowledgeGraphManager.getEntityStatus(o.name) || "unknown";
+                        return `- **${o.name}** (Status: ${observationStatus})`;
+                    });
+                    const resolvedObservationsText = observationsText ?
+                        await Promise.all(observationsText).then(texts => texts.join("\n")) :
+                        "No observations recorded";
                     // Format quotes
                     const quotesText = participantProfile.quotes?.map((q) => {
-                        const source = q.observations.find(o => o.startsWith("source:"))?.substring(7) || "Unknown source";
+                        // Show the full quote
                         const quote = q.observations.find(o => !o.startsWith("source:") && !o.startsWith("context:"));
+                        const source = q.observations.find(o => o.startsWith("source:"))?.substring(7) || "Unknown source";
                         return `- "${quote || "No text available"}" (Source: ${source})`;
                     }).join("\n") || "No quotes recorded";
                     // Format memos
-                    const memosText = participantProfile.memos?.map((m) => {
-                        const date = m.observations.find(o => o.startsWith("date:"))?.substring(5) || "Unknown date";
-                        const title = m.observations.find(o => o.startsWith("topic:"))?.substring(6) || "Untitled";
-                        return `- **${title}** (${date})`;
-                    }).join("\n") || "No memos about this participant";
+                    const memosText = participantProfile.memos?.map(async (m) => {
+                        const memoStatus = await knowledgeGraphManager.getEntityStatus(m.name) || "unknown";
+                        const topic = m.observations.find(o => o.startsWith("topic:"))?.substring(6) || "Untitled";
+                        return `- **${topic}** (Status: ${memoStatus})`;
+                    });
+                    const resolvedMemosText = memosText ?
+                        await Promise.all(memosText).then(texts => texts.join("\n")) :
+                        "No memos about this participant";
                     contextMessage = `# Participant Context: ${entityName}
+
+## Status and Priority
+- **Status**: ${status}
+${priorityText}
+
+## Observations
+${observationsList}
 
 ## Demographics
 ${demographics}
 
 ## Interviews
-${interviewsText}
+${resolvedInterviewsText}
 
 ## Observations
-${observationsText}
+${resolvedObservationsText}
 
 ## Quotes
 ${quotesText}
 
 ## Research Memos
-${memosText}`;
+${resolvedMemosText}`;
                 }
                 else if (entityType === "interview") {
                     // Find which project this interview belongs to
@@ -1129,20 +1276,31 @@ ${memosText}`;
                             }
                         }
                     }
-                    // Get interview details
+                    // Get status and priority using the relation-based approach
+                    const status = await knowledgeGraphManager.getEntityStatus(entityName) || "Unknown";
+                    const priority = await knowledgeGraphManager.getEntityPriority(entityName);
+                    const priorityText = priority ? `- **Priority**: ${priority}` : "";
+                    // Format observations
+                    const observationsList = entity.observations.length > 0
+                        ? entity.observations.map(obs => `- ${obs}`).join("\n")
+                        : "No observations";
+                    // Get interview details without parsing date
                     const participant = entity.observations.find(o => o.startsWith("participant:"))?.substring(12) || "Unknown";
-                    const date = entity.observations.find(o => o.startsWith("date:"))?.substring(5) || "Unknown date";
-                    const transcript = entity.observations.find(o => !o.startsWith("participant:") && !o.startsWith("date:"));
-                    // Find codes applied to this interview
-                    const relatedCodes = [];
+                    // Find codes applied to this interview and include their status
+                    const codesWithStatus = [];
                     for (const relation of entityGraph.relations) {
-                        if (relation.relationType === 'coded_with' && relation.from === entityName) {
-                            const code = entityGraph.entities.find(e => e.name === relation.to && e.entityType === 'code');
+                        if (relation.relationType === 'codes' && relation.to === entityName) {
+                            const code = entityGraph.entities.find(e => e.name === relation.from && e.entityType === 'code');
                             if (code) {
-                                relatedCodes.push(code);
+                                const codeStatus = await knowledgeGraphManager.getEntityStatus(code.name) || "unknown";
+                                codesWithStatus.push({
+                                    code,
+                                    status: codeStatus
+                                });
                             }
                         }
                     }
+                    const codesText = codesWithStatus.map(c => `- **${c.code.name}** (Status: ${c.status}): ${c.code.observations[0] || "No description"}`).join("\n") || "No codes applied yet";
                     // Find quotes from this interview
                     const quotes = [];
                     for (const relation of entityGraph.relations) {
@@ -1153,29 +1311,21 @@ ${memosText}`;
                             }
                         }
                     }
-                    // Format codes
-                    const codesText = relatedCodes.map((code) => {
-                        const definition = code.observations.find(o => !o.startsWith("status:") && !o.startsWith("created:"));
-                        return `- **${code.name}**: ${definition || "No definition"}`;
-                    }).join("\n") || "No codes applied yet";
-                    // Format quotes
-                    const quotesText = quotes.map((quote) => {
-                        const text = quote.observations.find(o => !o.startsWith("source:") && !o.startsWith("context:"));
-                        const codes = entityGraph.relations
-                            .filter(r => r.relationType === 'coded_with' && r.to === quote.name)
-                            .map(r => r.from)
-                            .join(", ");
-                        return `- "${text || "No text"}"${codes ? ` [Codes: ${codes}]` : ''}`;
-                    }).join("\n") || "No quotes extracted";
+                    const quotesText = quotes.map(q => {
+                        // Get the full quote text
+                        const quoteText = q.observations.find(o => !o.startsWith("context:") && !o.startsWith("speaker:")) || "No text";
+                        return `- "${quoteText}"`;
+                    }).join("\n") || "No notable quotes recorded";
                     contextMessage = `# Interview Context: ${entityName}
 
-## Interview Details
+## Overview
 - **Project**: ${projectName}
 - **Participant**: ${participant}
-- **Date**: ${date}
+- **Status**: ${status}
+${priorityText}
 
-## Transcript
-${transcript || "No transcript available"}
+## Observations
+${observationsList}
 
 ## Applied Codes
 ${codesText}
@@ -1587,10 +1737,7 @@ ${relatedText}`;
             const codingActivityStage = stages.find(s => s.stage === "codingActivity");
             const themesStage = stages.find(s => s.stage === "themes");
             const projectStatusStage = stages.find(s => s.stage === "projectStatus");
-            // Get current date
-            const date = new Date().toISOString().split('T')[0];
             return {
-                date,
                 summary: summaryStage?.stageData?.summary || "",
                 duration: summaryStage?.stageData?.duration || "unknown",
                 project: summaryStage?.stageData?.project || "",
@@ -1727,7 +1874,6 @@ ${relatedText}`;
                     const args = stageResult.stageData;
                     try {
                         // Parse arguments
-                        const date = args.date;
                         const summary = args.summary;
                         const duration = args.duration;
                         const project = args.project;
@@ -1737,6 +1883,23 @@ ${relatedText}`;
                         const newThemes = args.newThemes ? JSON.parse(args.newThemes) : [];
                         const projectStatus = args.projectStatus;
                         const projectObservation = args.projectObservation;
+                        // Update project status using the relation-based approach
+                        try {
+                            // Set the project status using our helper method
+                            if (projectStatus) {
+                                await knowledgeGraphManager.setEntityStatus(project, projectStatus);
+                            }
+                            // Add observation if provided
+                            if (projectObservation) {
+                                await knowledgeGraphManager.addObservations([{
+                                        entityName: project,
+                                        contents: [projectObservation]
+                                    }]);
+                            }
+                        }
+                        catch (error) {
+                            console.error(`Error updating status for project ${project}:`, error);
+                        }
                         // Record session completion in persistent storage
                         sessionState.push({
                             type: 'session_completed',
@@ -1748,13 +1911,13 @@ ${relatedText}`;
                         // Prepare the summary message
                         const summaryMessage = `# Qualitative Research Session Recorded
 
-I've recorded your research session from ${date} focusing on the ${project} project.
+I've recorded your research session focusing on the ${project} project.
 
 ## Session Summary
 ${summary}
 
 ${interviewData.length > 0 ? `## Interviews Conducted
-${interviewData.map((i) => `- Interview with ${i.participant}${i.date ? ` on ${i.date}` : ''}`).join('\n')}` : "No interviews were recorded."}
+${interviewData.map((i) => `- Interview with ${i.participant}`).join('\n')}` : "No interviews were recorded."}
 
 ${newMemos.length > 0 ? `## Research Memos Created
 ${newMemos.map((m) => `- ${m.topic}`).join('\n')}` : "No memos were created."}
@@ -1838,72 +2001,79 @@ Would you like me to perform any additional updates to your qualitative research
                 // Initialize the session state
                 sessionStates.set(sessionId, []);
                 await saveSessionStates(sessionStates);
-                // Convert sessions map to array and sort by date
+                // Convert sessions map to array and retrieve the most recent sessions
                 const recentSessions = Array.from(sessionStates.entries())
                     .map(([id, stages]) => {
                     // Extract summary data from the first stage (if it exists)
                     const summaryStage = stages.find(s => s.stage === "summary");
                     return {
                         id,
-                        date: summaryStage?.stageData?.date || "Unknown date",
                         project: summaryStage?.stageData?.project || "Unknown project",
                         summary: summaryStage?.stageData?.summary || "No summary available"
                     };
                 })
-                    .sort((a, b) => b.date.localeCompare(a.date))
                     .slice(0, 3); // Default to showing 3 recent sessions
-                // Query for active research projects
-                const projectsQuery = await knowledgeGraphManager.searchNodes("entityType:project status:active");
-                const projects = projectsQuery.entities;
+                // Query for all research projects and filter by status
+                const projectsQuery = await knowledgeGraphManager.searchNodes("entityType:project");
+                const projects = [];
+                // Filter for active projects based on has_status relation
+                for (const project of projectsQuery.entities) {
+                    const status = await knowledgeGraphManager.getEntityStatus(project.name);
+                    if (status === "active" || status === "in_progress" || status === "data_collection" || status === "analysis") {
+                        projects.push(project);
+                    }
+                }
                 // Query for a sample of participants
                 const participantsQuery = await knowledgeGraphManager.searchNodes("entityType:participant");
                 const participants = participantsQuery.entities.slice(0, 5); // Limit to 5 participants for initial display
                 // Get all codes
                 const codesQuery = await knowledgeGraphManager.searchNodes("entityType:code");
-                const codes = codesQuery.entities;
-                // Sort codes by reference count (if available)
-                const sortedCodes = codes.sort((a, b) => {
-                    const countA = parseInt(a.observations.find(o => o.startsWith("references:"))?.substring(11) || "0");
-                    const countB = parseInt(b.observations.find(o => o.startsWith("references:"))?.substring(11) || "0");
-                    return countB - countA; // Sort by reference count (highest first)
-                }).slice(0, 10); // Top 10 codes
+                const codes = codesQuery.entities.slice(0, 10); // Top 10 codes
                 // Get recent memos
                 const memosQuery = await knowledgeGraphManager.searchNodes("entityType:memo");
-                const memos = memosQuery.entities.sort((a, b) => {
-                    const dateA = a.observations.find(o => o.startsWith("created:"))?.substring(8) || "";
-                    const dateB = b.observations.find(o => o.startsWith("created:"))?.substring(8) || "";
-                    return dateB.localeCompare(dateA); // Sort by date descending
-                }).slice(0, 3); // Most recent 3 memos
-                // Format the context information
-                const projectsText = projects.map(p => {
-                    const status = p.observations.find(o => o.startsWith("status:"))?.substring(7) || "Unknown";
-                    const phase = p.observations.find(o => o.startsWith("phase:"))?.substring(6) || "Unknown";
-                    return `- **${p.name}** (${status}, Phase: ${phase})`;
-                }).join("\n");
-                const participantsText = participants.map(p => {
-                    const demographic = p.observations.find(o => o.startsWith("demographic:"))?.substring(12) || "Unknown";
-                    const status = p.observations.find(o => o.startsWith("status:"))?.substring(7) || "Active";
-                    return `- **${p.name}** (${demographic}, Status: ${status})`;
-                }).join("\n");
-                const codesText = sortedCodes.map(c => {
-                    const references = c.observations.find(o => o.startsWith("references:"))?.substring(11) || "0";
-                    const group = c.observations.find(o => o.startsWith("group:"))?.substring(6) || "Uncategorized";
-                    return `- **${c.name}** (${references} refs, Group: ${group})`;
-                }).join("\n");
-                const memosText = memos.map(m => {
-                    const created = m.observations.find(o => o.startsWith("created:"))?.substring(8) || "Unknown date";
-                    const type = m.observations.find(o => o.startsWith("type:"))?.substring(5) || "General";
-                    const summary = m.observations.find(o => !o.startsWith("created:") && !o.startsWith("type:"));
-                    return `- **${m.name}** (${created}, ${type}): ${summary ? summary.substring(0, 100) + (summary.length > 100 ? '...' : '') : "No summary"}`;
-                }).join("\n");
+                const memos = memosQuery.entities.slice(0, 3); // Most recent 3 memos
+                // Format the context information using entity-relation approach
+                const projectsText = await Promise.all(projects.map(async (p) => {
+                    const status = await knowledgeGraphManager.getEntityStatus(p.name) || "Unknown";
+                    const priority = await knowledgeGraphManager.getEntityPriority(p.name);
+                    const priorityText = priority ? `, Priority: ${priority}` : "";
+                    // Show truncated preview of first observation
+                    const preview = p.observations.length > 0
+                        ? `${p.observations[0].substring(0, 60)}${p.observations[0].length > 60 ? '...' : ''}`
+                        : "No description";
+                    return `- **${p.name}** (Status: ${status}${priorityText}): ${preview}`;
+                }));
+                const participantsText = await Promise.all(participants.map(async (p) => {
+                    const status = await knowledgeGraphManager.getEntityStatus(p.name) || "Active";
+                    // Show truncated preview of first observation for demographics
+                    const preview = p.observations.length > 0
+                        ? `${p.observations[0].substring(0, 60)}${p.observations[0].length > 60 ? '...' : ''}`
+                        : "No demographics";
+                    return `- **${p.name}** (Status: ${status}): ${preview}`;
+                }));
+                const codesText = await Promise.all(codes.map(async (c) => {
+                    const status = await knowledgeGraphManager.getEntityStatus(c.name) || "initial";
+                    // Show truncated preview of first observation for description
+                    const preview = c.observations.length > 0
+                        ? `${c.observations[0].substring(0, 60)}${c.observations[0].length > 60 ? '...' : ''}`
+                        : "No description";
+                    return `- **${c.name}** (Status: ${status}): ${preview}`;
+                }));
+                const memosText = await Promise.all(memos.map(async (m) => {
+                    const status = await knowledgeGraphManager.getEntityStatus(m.name) || "draft";
+                    // Show truncated preview of first observation for content
+                    const preview = m.observations.length > 0
+                        ? `${m.observations[0].substring(0, 60)}${m.observations[0].length > 60 ? '...' : ''}`
+                        : "No content";
+                    return `- **${m.name}** (Status: ${status}): ${preview}`;
+                }));
                 const sessionsText = recentSessions.map(s => {
-                    return `- ${s.date}: ${s.project} - ${s.summary.substring(0, 100)}${s.summary.length > 100 ? '...' : ''}`;
+                    return `- ${s.project} - ${s.summary.substring(0, 60)}${s.summary.length > 60 ? '...' : ''}`;
                 }).join("\n");
-                const date = new Date().toISOString().split('T')[0];
                 return {
                     content: [{
                             type: "text",
-                            text: `# Ask user to choose what to focus on in this session. Present the following options:
+                            text: `# Choose what to focus on in this session
 
 ## Session ID
 \`${sessionId}\`
@@ -1912,16 +2082,16 @@ Would you like me to perform any additional updates to your qualitative research
 ${sessionsText || "No recent sessions found."}
 
 ## Active Research Projects
-${projectsText || "No active projects found."}
+${projectsText.join("\n") || "No active projects found."}
 
 ## Sample Participants
-${participantsText || "No participants found."}
+${participantsText.join("\n") || "No participants found."}
 
 ## Top Codes
-${codesText || "No codes found."}
+${codesText.join("\n") || "No codes found."}
 
 ## Recent Memos
-${memosText || "No memos found."}
+${memosText.join("\n") || "No memos found."}
 
 To load specific context, use the \`loadcontext\` tool with the entity name and session ID - ${sessionId}`
                         }]

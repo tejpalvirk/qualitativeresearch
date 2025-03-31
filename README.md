@@ -33,6 +33,8 @@ The Qualitative Researcher MCP Server recognizes the following entity types:
 - **literature**: Academic sources
 - **researchQuestion**: Formal questions guiding the study
 - **finding**: Results or conclusions
+- **status**: Entity status values (active, completed, pending, abandoned)
+- **priority**: Priority level values (high, low)
 
 ## Relationships
 
@@ -56,16 +58,19 @@ Entities can be connected through the following relationship types:
 - **collected_on**: Data collection date
 - **analyzes**: Analysis relationship
 - **triangulates_with**: Triangulation between data sources
+- **has_status**: Links entities to their current status (active, completed, pending, abandoned)
+- **has_priority**: Links entities to their priority level (high, low)
+- **precedes**: Indicates that one analysis activity comes before another in a sequence
 
 ## Available Tools
 
 The Qualitative Researcher MCP Server provides these tools for interacting with research knowledge:
 
 ### startsession
-Starts a new qualitative research session, generating a unique session ID and displaying current research projects, recent data collection, emergent themes, and previous sessions.
+Starts a new qualitative research session, generating a unique session ID and displaying current research projects, recent data collection, emergent themes, and previous sessions. Shows status information via has_status relations, priority levels via has_priority relations, and identifies research activities ready to be worked on next based on sequential process relationships.
 
 ### loadcontext
-Loads detailed context for a specific entity (project, participant, interview, etc.), displaying relevant information based on entity type.
+Loads detailed context for a specific entity (project, participant, interview, etc.), displaying relevant information based on entity type. Includes status information, priority levels, and sequential process relationships.
 
 ### endsession
 Records the results of a research session through a structured, multi-stage process:
@@ -74,19 +79,20 @@ Records the results of a research session through a structured, multi-stage proc
 3. **memos**: Records analytical memos created during the session
 4. **codingActivity**: Tracks new and revised codes applied to data
 5. **themes**: Documents emergent or developed themes from analysis
-6. **projectStatus**: Updates overall project status and observations
-7. **assembly**: Final assembly of all session data
+6. **statusUpdates**: Records changes to entity status values
+7. **projectStatus**: Updates overall project status, priority assignments, and sequential relationships
+8. **assembly**: Final assembly of all session data
 
 ### buildcontext
 Creates new entities, relations, or observations in the knowledge graph:
-- **entities**: Add new research entities (projects, participants, interviews, etc.)
-- **relations**: Create relationships between entities
+- **entities**: Add new research entities (projects, participants, interviews, status, priority, etc.)
+- **relations**: Create relationships between entities (including has_status, has_priority, precedes)
 - **observations**: Add observations to existing entities
 
 ### deletecontext
 Removes entities, relations, or observations from the knowledge graph:
 - **entities**: Remove research entities
-- **relations**: Remove relationships between entities
+- **relations**: Remove relationships between entities (including status, priority, and sequential relations)
 - **observations**: Remove specific observations from entities
 
 ### advancedcontext
@@ -95,6 +101,9 @@ Retrieves information from the knowledge graph:
 - **search**: Search for nodes based on query criteria
 - **nodes**: Get specific nodes by name
 - **related**: Find related entities
+- **status**: Find entities with a specific status value (active, completed, pending, abandoned)
+- **priority**: Find entities with a specific priority value (high, low)
+- **sequence**: Identify sequential relationships for analysis activities
 
 ## Domain-Specific Functions
 
@@ -110,6 +119,9 @@ The Qualitative Researcher MCP Server includes specialized domain functions for 
 - **getMemosByFocus**: Retrieve all memos related to a specific entity
 - **getMethodologyDetails**: Review methodological approach, sampling, and analysis techniques
 - **getRelatedEntities**: Find entities related to a specific entity by relationship type
+- **getStatusOverview**: View all entities with a specific status (active, completed, pending, abandoned)
+- **getPriorityItems**: Identify high-priority research tasks and activities
+- **getAnalysisSequence**: Visualize the sequence of analysis activities based on precedes relations
 
 ## Example Prompts
 
@@ -125,16 +137,16 @@ Load the context for the Health Behavior Study project so I can see the current 
 
 ### Recording Session Results
 ```
-I've just finished analyzing interview data for my Health Behavior Study. I identified two new themes related to social support, coded three new interviews, and wrote memos about emerging patterns in participant responses. The project is progressing well, and I'm beginning to reach theoretical saturation.
+I've just finished analyzing interview data for my Health Behavior Study. I identified two new themes related to social support, coded three new interviews, and wrote memos about emerging patterns in participant responses. I've marked the initial coding phase as complete and set the thematic analysis as high priority. The project is progressing well, and I'm beginning to reach theoretical saturation.
 ```
 
 ### Managing Research Knowledge
 ```
-Create a new code called "Family Support" that's part of the "Social Support" code group in the Health Behavior Study project.
+Create a new code called "Family Support" that's part of the "Social Support" code group in the Health Behavior Study project. Set its status to active and make it precede the "Social Network Analysis" activity.
 ```
 
 ```
-Add an observation to the "P001" participant that they have a strong family support network based on their interview responses.
+Update the status of the "Participant Recruitment" process to "completed" and add an observation that we've reached our target sample size.
 ```
 
 ## Usage
@@ -148,6 +160,9 @@ This MCP server enables qualitative researchers to:
 - **Support Theoretical Development**: Document theoretical insights through the memo writing process
 - **Prepare Research Findings**: Connect findings to supporting evidence and research questions
 - **Enhance Methodological Rigor**: Document methodological decisions and analysis process
+- **Track Research Progress**: Monitor entity status throughout the research lifecycle
+- **Prioritize Research Tasks**: Identify and focus on high-priority research activities
+- **Sequence Analysis Activities**: Plan and visualize the logical order of research and analytical steps
 
 ## Configuration
 
@@ -238,3 +253,28 @@ docker build -t mcp/qualitativeresearch -f qualitativeresearch/Dockerfile .
 ## License
 
 This MCP server is licensed under the MIT License. This means you are free to use, modify, and distribute the software, subject to the terms and conditions of the MIT License. For more details, please see the LICENSE file in the project repository.
+
+## Environment Variables
+
+The Qualitative Research MCP Server supports the following environment variables to customize where data is stored:
+
+- **MEMORY_FILE_PATH**: Path where the knowledge graph data will be stored
+  - Can be absolute or relative (relative paths use current working directory)
+  - Default: `./qualitativeresearch/memory.json`
+
+- **SESSIONS_FILE_PATH**: Path where session data will be stored
+  - Can be absolute or relative (relative paths use current working directory)
+  - Default: `./qualitativeresearch/sessions.json`
+
+Example usage:
+
+```bash
+# Store data in the current directory
+MEMORY_FILE_PATH="./qualitative-memory.json" SESSIONS_FILE_PATH="./qualitative-sessions.json" npx github:tejpalvirk/contextmanager-qualitativeresearch
+
+# Store data in a specific location (absolute path)
+MEMORY_FILE_PATH="/path/to/data/qualitative-memory.json" npx github:tejpalvirk/contextmanager-qualitativeresearch
+
+# Store data in user's home directory
+MEMORY_FILE_PATH="$HOME/contextmanager/qualitative-memory.json" npx github:tejpalvirk/contextmanager-qualitativeresearch
+```

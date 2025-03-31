@@ -13,7 +13,7 @@
     "*.txt"
   ],
   "scripts": {
-    "build": "tsc && shx chmod +x index.js",
+    "build": "tsc && shx chmod +x index.js && cp qualitativeresearch_*.txt ../main/descriptions",
     "prepare": "npm run build",
     "start": "node index.js"
   },

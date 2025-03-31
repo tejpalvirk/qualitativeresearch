@@ -9,15 +9,20 @@ When to use this tool:
 - Documenting emerging themes, codes, and analytical insights during research
 - Creating research questions and linking them to findings
 - Building code hierarchies and thematic frameworks
+- Setting status values for research activities and entities
+- Assigning priorities to research tasks and activities
+- Defining sequential relationships between research processes
 
 Key features:
 - Creates three distinct types of knowledge graph elements: entities, relations, and observations
-- Supports 13 specialized qualitative research entity types (projects, participants, interviews, observations, documents, codes, code groups, memos, themes, quotes, literature, research questions, findings)
+- Supports specialized qualitative research entity types (projects, participants, interviews, observations, documents, codes, etc.)
 - Validates entity and relation types against predefined standards for the qualitative research domain
 - Handles batch creation of multiple entities or relations in a single operation
 - Returns confirmation with details of created elements
 - Ensures proper data typing and structure for the qualitative research knowledge graph
 - Enables comprehensive documentation of the research process
+- Supports status and priority assignment through entity-relation model
+- Enables sequential relationships through precedes relation
 
 Parameters explained:
 1. type: The type of creation operation to perform
@@ -26,15 +31,56 @@ Parameters explained:
 2. data: The content to add to the knowledge graph (structure varies by type):
   - For "entities": An array of objects, each containing:
     * name: Unique identifier for the entity
-    * entityType: One of the valid entity types (project, participant, interview, observation, document, code, codeGroup, memo, theme, quote, literature, researchQuestion, finding)
+    * entityType: One of the valid entity types (project, participant, interview, observation, document, code, codeGroup, memo, theme, quote, literature, researchQuestion, finding, status, priority)
     * observations: Array of strings containing notes or properties about the entity
   - For "relations": An array of objects, each containing:
     * from: Name of the source entity
     * to: Name of the target entity
-    * relationType: The type of relationship between entities
+    * relationType: The type of relationship between entities (e.g., "participated_in", "codes", "has_status", "has_priority")
   - For "observations": Either a single object or an array of objects, each containing:
     * entityName: Name of the entity to add observations to
     * contents: Array of strings with new observations to add
+
+Valid entity types:
+- project: Overall research study
+- participant: Research subjects
+- interview: Formal conversation with participants
+- observation: Field notes from observational research
+- document: External materials being analyzed
+- code: Labels applied to data segments
+- codeGroup: Categories or families of related codes
+- memo: Researcher's analytical notes
+- theme: Emergent patterns across data
+- quote: Notable excerpts from data sources
+- literature: Academic sources
+- researchQuestion: Formal questions guiding the study
+- finding: Results or conclusions
+- status: Entity status values
+- priority: Entity priority values
+
+Valid relation types:
+- participated_in: Links participants to interviews/observations
+- codes: Shows which codes apply to which data
+- contains: Hierarchical relationship
+- supports: Data supporting a theme or finding
+- contradicts: Data contradicting a theme or finding
+- answers: Data addressing a research question
+- cites: References to literature
+- followed_by: Temporal sequence
+- related_to: General connection
+- reflects_on: Memo reflecting on data/code/theme
+- compares: Comparative relationship
+- has_status: Links entity to its status
+- has_priority: Links entity to its priority
+- precedes: Entity comes before another entity in sequence
+
+Status information:
+- Valid status values include: planning, data_collection, analysis, writing, complete, scheduled, conducted, transcribed, coded, analyzed, emerging, developing, established, preliminary, draft, final, active, in_progress
+- Status is assigned through the has_status relation type
+
+Priority information:
+- Valid priority values: high, low
+- Priority is assigned through the has_priority relation type
 
 Return information:
 - JSON response indicating success or failure
@@ -56,6 +102,9 @@ You should:
 - Begin by creating projects and participants before more specific research elements
 - Add detailed observations to entities to enhance context and retrievability
 - Create relationships to build a comprehensive network of interconnected research data
+- Use has_status relations to track the progress of research activities
+- Use has_priority relations to indicate important research elements
+- Use the precedes relation to establish sequences in research processes
 - Use observations to document the evolution of codes, themes, and analytical thinking
 - Regularly update entity observations as your understanding evolves
 - Build hierarchical structures using relations (e.g., codes within code groups, themes connecting multiple codes)

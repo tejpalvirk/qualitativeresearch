@@ -12,9 +12,12 @@ When to use this tool:
 - Finding connections between different aspects of your research
 - Creating research reports or summaries from your data
 - Exploring thematic structures and their evidentiary basis
+- Identifying entities by status to track research progress
+- Filtering tasks by priority to manage research workflow
+- Analyzing sequential relationships between research processes
 
 Key features:
-- Offers 12 specialized operations for querying different aspects of qualitative research data
+- Offers specialized operations for querying different aspects of qualitative research data
 - Retrieves complete or filtered views of the research knowledge graph
 - Provides flexible search capabilities across all research entities
 - Supports detailed exploration of specific entities by name
@@ -24,10 +27,13 @@ Key features:
 - Identifies related entities to explore connections within your research
 - Returns consistently structured JSON responses for easy processing
 - Facilitates depth and breadth exploration of qualitative data
+- Supports status-based filtering of research entities
+- Enables priority-based task management
+- Provides sequential process analysis capabilities
 
 Parameters explained:
 1. type: The type of query operation to perform
-  - Accepts one of 12 specialized operations: "graph", "search", "nodes", "project", "participant", "codes", "themes", "transcript", "memo", "analysis", "codebook", or "related"
+  - Accepts one of the specialized operations: "graph", "search", "nodes", "project", "participant", "codes", "themes", "transcript", "memo", "analysis", "codebook", "related", "status", "priority", "sequence"
   - Determines how the params parameter is interpreted 
 2. params: Operation-specific parameters (structure varies by type):
   - For "graph": No parameters needed (retrieves the full research knowledge graph)
@@ -54,6 +60,12 @@ Parameters explained:
     * projectName: Project name to generate codebook for
   - For "related": Object containing:
     * entityName: Name of the entity to find related entities for
+  - For "status": Object containing:
+    * statusValue: The status value to filter by (e.g., "planning", "data_collection", "analysis")
+  - For "priority": Object containing:
+    * priorityValue: The priority value to filter by (e.g., "high", "low")
+  - For "sequence": Object containing:
+    * entityName: Name of the entity to find sequential relationships for
 
 Operation details:
 - graph: Returns the complete research knowledge graph with all entities and relationships
@@ -68,6 +80,20 @@ Operation details:
 - analysis: Collects all analysis artifacts (codes, themes, memos) for a specific project
 - codebook: Generates a structured codebook for a project with code definitions and examples
 - related: Identifies all entities directly connected to a specific entity
+- status: Retrieves all entities with a specific status value
+- priority: Retrieves all entities with a specific priority value
+- sequence: Identifies sequential relationships for a specific entity showing preceding and following entities
+
+Status and Priority Information:
+- Status queries return entities organized by their current research stage
+- Priority queries help identify critical research tasks and elements
+- Status values include: planning, data_collection, analysis, writing, complete, scheduled, conducted, transcribed, coded, analyzed, emerging, developing, established, preliminary, draft, final, active, in_progress
+- Priority values include: high, low
+
+Sequential Process Information:
+- Sequence queries identify entities that come before or after in a research process
+- Sequential relationships help visualize the research workflow
+- The sequence operation shows both incoming and outgoing precedes relations
 
 Return information:
 - JSON response with a consistent structure:
@@ -77,6 +103,8 @@ Return information:
     * results: For search operations
     * nodes: For specific entity retrieval
     * project/participant/etc.: For specialized views
+    * status/priority: Lists of entities with specified status/priority values
+    * sequence: Preceding and following entities in research processes
 - Error information when operations fail
 
 You should:
@@ -88,4 +116,7 @@ You should:
 - Explore thematic structures through themes and related entity queries
 - Review memos to track your analytical process over time
 - Filter code and theme queries by project for more focused results
-- Use search with entity type filters to find specific types of research elements 
+- Use search with entity type filters to find specific types of research elements
+- Use status queries to identify all entities at a particular research stage
+- Use priority queries to focus on high-priority research tasks
+- Use sequence queries to understand process flows in your research methodology 
