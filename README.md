@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/tejpalvirk-qualitativeresearch-badge.png)](https://mseep.ai/app/tejpalvirk-qualitativeresearch)
+
 # Qualitative Researcher MCP Server
 
 An MCP server implementation that provides tools for managing qualitative research knowledge graphs, enabling structured representation of research projects, participants, interviews, observations, codes, themes, and findings. This server helps qualitative researchers organize their data, track their analysis process, develop themes, and generate insights from rich textual data.
